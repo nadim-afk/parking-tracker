@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Guest Parking Pass Tracker</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; background: #f5f5f3; }
+
+.container { max-width: 900px; margin: 0 auto; padding: 20px; }
+
+.header { margin-bottom: 24px; }
+.header h1 { font-size: 20px; font-weight: 500; color: #333; margin-bottom: 4px; }
+.header p { font-size: 13px; color: #999; }
+
+.metrics { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 12px; margin-bottom: 24px; }
+.metric { background: #fff; padding: 16px; border-radius: 8px; border: 0.5px solid #e0e0e0; }
+.metric-label { font-size: 12px; color: #999; margin-bottom: 8px; }
+.metric-value { font-size: 28px; font-weight: 500; color: #333; }
+
+.section { background: #fff; border: 0.5px solid #e0e0e0; border-radius: 12px; padding: 20px; margin-bottom: 20px; }
+.section h2 { font-size: 16px; font-weight: 500; color: #333; margin-bottom: 16px; }
+
+.form-group { margin-bottom: 16px; }
+.form-group label { display: block; font-size: 13px; color: #666; margin-bottom: 6px; }
+.form-group input, .form-group select { width: 100%; padding: 8px 12px; border: 0.5px solid #e0e0e0; border-radius: 8px; font-size: 14px; color: #333; background: #fff; }
+.form-group input:focus, .form-group select:focus { outline: none; border-color: #999; }
+
+.form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.button-group { display: flex; gap: 8px; }
+
+button { padding: 8px 16px; border: 0.5px solid #999; background: #fff; color: #333; border-radius: 8px; font-size: 14px; cursor: pointer; transition: all 0.2s; }
+button:hover { background: #f9f9f7; }
+button:active { transform: scale(0.98); }
+button.primary { background: #0066cc; color: white; border-color: #0066cc; }
+button.primary:hover { opacity: 0.9; }
+button.danger { color: #d32f2f; }
+button.danger:hover { background: rgba(211, 47, 47, 0.1); }
+
+.booking-row { display: flex; justify-content: space-between; align-items: center; padding: 12px; background: #f9f9f7; border-radius: 8px; margin-bottom: 8px; }
+.booking-info { flex: 1; }
+.booking-guest { font-weight: 500; color: #333; }
+.booking-details { font-size: 12px; color: #666; margin-top: 4px; }
+.booking-days { font-size: 12px; background: #e3f2fd; padding: 4px 8px; border-radius: 4px; color: #0066cc; font-weight: 500; }
+
+.empty-state { text-align: center; padding: 32px 16px; color: #999; font-size: 13px; }
+
+.sales-table { width: 100%; font-size: 13px; }
+.sales-table th { text-align: left; padding: 8px; border-bottom: 0.5px solid #e0e0e0; color: #666; font-weight: 500; }
+.sales-table td { padding: 8px; border-bottom: 0.5px solid #e0e0e0; }
+.sales-table tr:hover { background: #f9f9f7; }
+
+.toast { position: fixed; bottom: 20px; right: 20px; background: #4caf50; color: white; padding: 12px 16px; border-radius: 8px; font-size: 13px; z-index: 1000; animation: slideIn 0.3s ease-out; }
+@keyframes slideIn { from { transform: translateX(400px); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+
+.reset-btn { margin-top: 16px; padding: 8px 12px; font-size: 12px; background: #f0f0f0; border: 0.5px solid #ccc; }
+</style>
+</head>
+<body>
+
+<div class="container">
+  <div class="header">
+    <h1>Guest Parking Pass Tracker</h1>
+    <p>Internal team only • 2 passes total</p>
+  </div>
+
+  <div class="metrics">
+    <div class="metric">
+      <div class="metric-label">Total passes</div>
+      <div class="metric-value" id="totalPasses">2</div>
+    </div>
+    <div class="metric">
+      <div class="metric-label">Currently booked</div>
+      <div class="metric-value" id="bookedCount">0</div>
+    </div>
+    <div class="metric">
+      <div class="metric-label">Available now</div>
+      <div class="metric-value" id="availableCount">2</div>
+    </div>
+    <div class="metric">
+      <div class="metric-label">Available for sale</div>
+      <div class="metric-value" id="saleCount">2</div>
+    </div>
+  </div>
+
+  <div class="section">
+    <h2>Book a guest</h2>
+    <div class="form-group">
+      <label>Guest name</label>
+      <input type="text" id="guestName" placeholder="Full name">
+    </div>
+    <div class="form-group">
+      <label>Unit</label>
+      <select id="unitSelect">
+        <option>-- Select unit --</option>
+        <option>91 Howe 402</option>
+        <option>91 Howe 202</option>
+        <option>91 Howe 403</option>
+        <option>91 Howe 404</option>
+        <option>91 Howe 206</option>
+        <option>100 Howe 401</option>
+        <option>1000 Howe 412</option>
+        <option>196 Crown 207</option>
+        <option>91 Howe</option>
+      </select>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>Check-in</label>
+        <input type="date" id="checkIn">
+      </div>
+      <div class="form-group">
+        <label>Check-out</label>
+        <input type="date" id="checkOut">
+      </div>
+    </div>
+    <div class="button-group">
+      <button class="primary" onclick="addBooking()">Add booking</button>
+    </div>
+  </div>
+
+  <div class="section">
+    <h2>Current bookings</h2>
+    <div id="bookingsList"></div>
+  </div>
+
+  <div class="section">
+    <h2>Sales tracker</h2>
+    <table class="sales-table">
+      <tr>
+        <th>Guest</th>
+        <th>Unit</th>
+        <th>Date sold</th>
+        <th>Checkout date</th>
+      </tr>
+      <tbody id="salesList"></tbody>
+    </table>
+  </div>
+
+  <button class="reset-btn" onclick="resetAll()">Clear all data</button>
+</div>
+
+<script>
+const TOTAL_PASSES = 2;
+const STORAGE_KEY = 'parkingData2';
+
+function getToday() {
+  const d = new Date();
+  return d.toISOString().split('T')[0];
+}
+
+document.getElementById('checkIn').valueAsDate = new Date();
+document.getElementById('checkOut').valueAsDate = new Date(new Date().getTime() + 86400000);
+
+function loadData() {
+  const stored = localStorage.getItem(STORAGE_KEY);
+  return stored ? JSON.parse(stored) : { bookings: [], sales: [] };
+}
+
+function saveData(data) {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+}
+
+function updateMetrics() {
+  const data = loadData();
+  const booked = data.bookings.filter(b => new Date(b.checkOut) > new Date()).length;
+  const available = TOTAL_PASSES - booked;
+  
+  document.getElementById('bookedCount').textContent = booked;
+  document.getElementById('availableCount').textContent = available;
+  document.getElementById('saleCount').textContent = available;
+}
+
+function daysLeft(checkOut) {
+  const today = new Date();
+  const checkout = new Date(checkOut);
+  const diff = Math.ceil((checkout - today) / (1000 * 60 * 60 * 24));
+  return diff > 0 ? diff : 0;
+}
+
+function addBooking() {
+  const guestName = document.getElementById('guestName').value.trim();
+  const unit = document.getElementById('unitSelect').value;
+  const checkIn = document.getElementById('checkIn').value;
+  const checkOut = document.getElementById('checkOut').value;
+
+  if (!guestName || unit === '-- Select unit --' || !checkIn || !checkOut) {
+    alert('Please fill all fields');
+    return;
+  }
+
+  const data = loadData();
+  const activeCount = data.bookings.filter(b => new Date(b.checkOut) > new Date()).length;
+  
+  if (activeCount >= TOTAL_PASSES) {
+    alert('All passes are booked');
+    return;
+  }
+
+  const id = Date.now();
+  data.bookings.push({ id, guestName, unit, checkIn, checkOut, addedDate: getToday() });
+  saveData(data);
+
+  document.getElementById('guestName').value = '';
+  document.getElementById('unitSelect').value = '-- Select unit --';
+  document.getElementById('checkIn').valueAsDate = new Date();
+  document.getElementById('checkOut').valueAsDate = new Date(new Date().getTime() + 86400000);
+
+  showToast(`✓ ${guestName} booked at ${unit}`);
+  renderBookings();
+  updateMetrics();
+}
+
+function removeBooking(id) {
+  const data = loadData();
+  const booking = data.bookings.find(b => b.id === id);
+  
+  if (booking) {
+    data.bookings = data.bookings.filter(b => b.id !== id);
+    data.sales.push({
+      guestName: booking.guestName,
+      unit: booking.unit,
+      date: getToday(),
+      removedFrom: booking.checkOut
+    });
+    saveData(data);
+    renderBookings();
+    renderSales();
+    updateMetrics();
+    showToast(`✓ ${booking.guestName} checked out`);
+  }
+}
+
+function renderBookings() {
+  const data = loadData();
+  const active = data.bookings.filter(b => new Date(b.checkOut) > new Date()).sort((a, b) => new Date(a.checkOut) - new Date(b.checkOut));
+
+  const list = document.getElementById('bookingsList');
+  
+  if (active.length === 0) {
+    list.innerHTML = '<div class="empty-state">No active bookings</div>';
+    return;
+  }
+
+  list.innerHTML = active.map(b => `
+    <div class="booking-row">
+      <div class="booking-info">
+        <div class="booking-guest">${b.guestName}</div>
+        <div class="booking-details">${b.unit} • ${b.checkIn} to ${b.checkOut}</div>
+      </div>
+      <div style="display: flex; align-items: center; gap: 12px;">
+        <span class="booking-days">${daysLeft(b.checkOut)} days</span>
+        <button class="danger" onclick="removeBooking(${b.id})">Checkout</button>
+      </div>
+    </div>
+  `).join('');
+}
+
+function renderSales() {
+  const data = loadData();
+  const list = document.getElementById('salesList');
+  
+  if (data.sales.length === 0) {
+    list.innerHTML = '<tr><td colspan="4" style="text-align: center; padding: 24px; color: #999; font-size: 13px;">No checkouts yet</td></tr>';
+    return;
+  }
+
+  list.innerHTML = data.sales.map(s => `
+    <tr>
+      <td>${s.guestName}</td>
+      <td>${s.unit}</td>
+      <td>${s.date}</td>
+      <td>${s.removedFrom}</td>
+    </tr>
+  `).join('');
+}
+
+function showToast(msg) {
+  const toast = document.createElement('div');
+  toast.className = 'toast';
+  toast.textContent = msg;
+  document.body.appendChild(toast);
+  setTimeout(() => toast.remove(), 3000);
+}
+
+function resetAll() {
+  if (confirm('Clear all bookings and sales? This cannot be undone.')) {
+    localStorage.removeItem(STORAGE_KEY);
+    renderBookings();
+    renderSales();
+    updateMetrics();
+    showToast('Data cleared');
+  }
+}
+
+renderBookings();
+renderSales();
+updateMetrics();
+</script>
+
+</body>
+</html>
