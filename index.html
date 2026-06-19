@@ -3,244 +3,162 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Guest Parking Pass Tracker</title>
+<title>Parking Pass Tracker</title>
 <style>
 *{margin:0;padding:0;box-sizing:border-box;}
-body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:#f5f5f3;color:#1a1a1a;font-size:14px;}
-.wrap{max-width:940px;margin:0 auto;padding:20px;}
-h1{font-size:18px;font-weight:500;margin-bottom:2px;}
-.sub{font-size:12px;color:#888;margin-bottom:14px;}
-.sync-badge{display:inline-block;padding:4px 8px;border-radius:4px;font-size:11px;margin-bottom:14px;}
-.sync-badge.online{background:#E1F5EE;color:#085041;}
-.sync-badge.offline{background:#FCEBEB;color:#791F1F;}
-.sync-badge.error{background:#FFE0B2;color:#E65100;}
-.metrics{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:9px;margin-bottom:14px;}
-.metric{background:#f0f0ee;border-radius:8px;padding:12px 14px;}
-.ml{font-size:11px;color:#888;margin-bottom:5px;}
-.mv{font-size:22px;font-weight:500;color:#333;}
-.mv.green{color:#0F6E56;}
-.alert-bar{background:#FCEBEB;border:0.5px solid #F09595;border-radius:8px;padding:10px 14px;margin-bottom:12px;display:none;color:#791F1F;font-size:13px;}
-.alert-bar.show{display:block;}
-.alert-title{font-weight:500;margin-bottom:3px;}
-.alert-item{font-size:12px;margin-top:2px;}
-.card{background:#fff;border:0.5px solid #e0e0e0;border-radius:12px;padding:16px;margin-bottom:12px;}
-.card-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;flex-wrap:wrap;gap:8px;}
-.card-title{font-size:15px;font-weight:500;}
-.ftabs{display:flex;gap:6px;}
-.ftab{padding:5px 12px;border:0.5px solid #ccc;background:#fff;color:#666;border-radius:7px;font-size:12px;cursor:pointer;}
-.ftab.on{background:#0066cc;color:#fff;border-color:#0066cc;}
-.fg{margin-bottom:10px;}
-.fg label{display:block;font-size:12px;color:#666;margin-bottom:4px;}
-.fg input,.fg select{width:100%;padding:7px 10px;border:0.5px solid #e0e0e0;border-radius:7px;font-size:13px;color:#333;background:#fff;}
-.fg input[readonly]{background:#f9f9f7;color:#666;}
-.fg input:focus,.fg select:focus{outline:none;border-color:#0066cc;}
-.warn-txt{font-size:11px;color:#A32D2D;margin-top:4px;display:none;}
-.ok-txt{font-size:11px;color:#0F6E56;margin-top:4px;display:none;}
-.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
-.form-grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;}
-.btn{padding:7px 14px;border:0.5px solid #999;background:#fff;color:#333;border-radius:7px;font-size:13px;cursor:pointer;}
-.btn.pri{background:#0066cc;color:#fff;border-color:#0066cc;}
-.btn.sml{font-size:12px;padding:5px 10px;}
-.btn.red{color:#A32D2D;}
-.btn:disabled{opacity:0.5;cursor:not-allowed;}
-.btn-row{display:flex;gap:8px;margin-top:6px;}
-.pass-vis{display:flex;gap:10px;margin-bottom:12px;}
-.pass-slot{flex:1;border:0.5px solid #e0e0e0;border-radius:8px;padding:10px 12px;background:#fff;}
-.pass-slot.used{border-color:#378ADD;}
-.pass-slot.conflict-slot{border-color:#E24B4A;background:#FCEBEB;}
-.ps-label{font-size:11px;color:#888;margin-bottom:3px;}
-.ps-val{font-size:13px;font-weight:500;}
-.ps-det{font-size:11px;color:#888;margin-top:2px;}
-.nav-row{display:flex;gap:6px;margin-bottom:12px;flex-wrap:wrap;}
-.nav-tab{padding:6px 14px;border:0.5px solid #ccc;background:#fff;color:#666;border-radius:7px;font-size:13px;cursor:pointer;}
-.nav-tab.on{background:#1a1a1a;color:#fff;border-color:#1a1a1a;}
-.sec{display:none;}
-.sec.on{display:block;}
-.brow{display:flex;justify-content:space-between;align-items:center;padding:10px;background:#f9f9f7;border-radius:7px;margin-bottom:7px;gap:8px;flex-wrap:wrap;}
-.brow.cfl{background:#FCEBEB;border:0.5px solid #F09595;}
-.bname{font-weight:500;font-size:13px;}
-.bdet{font-size:11px;color:#666;margin-top:2px;}
-.bacts{display:flex;align-items:center;gap:6px;flex-wrap:wrap;}
-.badge{font-size:11px;padding:3px 7px;border-radius:4px;font-weight:500;white-space:nowrap;}
-.b-blue{background:#E6F1FB;color:#0C447C;}
-.b-green{background:#E1F5EE;color:#085041;}
-.b-red{background:#FCEBEB;color:#791F1F;}
-.b-amber{background:#FAEEDA;color:#633806;}
-.b-gray{background:#f0f0ee;color:#555;}
-.b-purple{background:#EEEDFE;color:#3C3489;}
-.empty{text-align:center;padding:24px;color:#999;font-size:13px;}
-.htable{width:100%;font-size:12px;border-collapse:collapse;table-layout:fixed;}
-.htable th{text-align:left;padding:7px 6px;border-bottom:0.5px solid #e0e0e0;color:#666;font-weight:500;}
-.htable td{padding:7px 6px;border-bottom:0.5px solid #e0e0e0;vertical-align:middle;}
-.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:3px;margin-top:6px;}
-.cal-dname{font-size:11px;color:#888;text-align:center;padding:3px 0;font-weight:500;}
-.cal-day{min-height:60px;border-radius:5px;border:0.5px solid #eee;padding:4px;font-size:10px;background:#fff;overflow:hidden;}
-.cal-day.past{opacity:0.4;}
-.cal-day.today-cell{border:2px solid #0066cc;background:#E6F1FB;}
-.cal-day-num{font-size:11px;font-weight:500;margin-bottom:2px;color:#333;}
-.cal-pip{font-size:9px;border-radius:3px;padding:1px 3px;margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:1.2;}
-.pip-b{background:#E6F1FB;color:#0C447C;}
-.pip-s{background:#E1F5EE;color:#085041;}
-.pip-c{background:#FCEBEB;color:#791F1F;}
-.cal-nav{display:flex;align-items:center;gap:8px;justify-content:center;margin-bottom:12px;}
-.cal-nav span{font-size:14px;font-weight:500;min-width:180px;text-align:center;}
-.legend{display:flex;gap:10px;font-size:11px;align-items:center;flex-wrap:wrap;margin-bottom:12px;}
-.leg-dot{width:10px;height:10px;border-radius:2px;display:inline-block;margin-right:3px;}
-.summary-box{background:#f9f9f7;border-radius:8px;padding:12px 14px;margin-bottom:10px;}
-.summary-row{display:flex;justify-content:space-between;font-size:13px;margin-bottom:4px;}
-.summary-row:last-child{margin-bottom:0;font-weight:500;border-top:0.5px solid #e0e0e0;padding-top:6px;margin-top:4px;}
-@keyframes slideIn{from{transform:translateX(300px);opacity:0;}to{transform:translateX(0);opacity:1;}}
+body{font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif;background:#f8f9fa;color:#2c3e50;line-height:1.6;}
+
+.container{max-width:800px;margin:0 auto;padding:20px;}
+
+.header{text-align:center;margin-bottom:40px;padding:30px 0;border-bottom:2px solid #e0e0e0;}
+.header h1{font-size:36px;font-weight:700;color:#1a1a1a;margin-bottom:8px;}
+.header p{font-size:16px;color:#666;}
+
+.section{background:white;padding:30px;margin-bottom:25px;border-radius:12px;box-shadow:0 2px 8px rgba(0,0,0,0.08);}
+
+.section-title{font-size:20px;font-weight:600;margin-bottom:20px;color:#1a1a1a;display:flex;align-items:center;}
+.section-title::before{content:'';width:4px;height:24px;background:#0066cc;border-radius:2px;margin-right:12px;}
+
+.form-group{margin-bottom:16px;}
+.form-label{display:block;font-size:14px;font-weight:600;color:#333;margin-bottom:8px;text-transform:uppercase;letter-spacing:0.5px;}
+.form-input,.form-select{width:100%;padding:12px;border:1px solid #ddd;border-radius:8px;font-size:15px;color:#333;background:white;transition:all 0.2s;}
+.form-input:focus,.form-select:focus{outline:none;border-color:#0066cc;box-shadow:0 0 0 3px rgba(0,102,204,0.1);}
+
+.btn{width:100%;padding:12px;background:#0066cc;color:white;border:none;border-radius:8px;font-size:15px;font-weight:600;cursor:pointer;transition:all 0.2s;}
+.btn:hover{background:#0052a3;transform:translateY(-2px);box-shadow:0 4px 12px rgba(0,102,204,0.3);}
+.btn:active{transform:translateY(0);}
+
+.passes-container{display:grid;grid-template-columns:1fr 1fr;gap:15px;margin-bottom:25px;}
+.pass-card{background:linear-gradient(135deg,#f5f5f5 0%,#ffffff 100%);padding:20px;border-radius:10px;border:2px solid #e0e0e0;text-align:center;}
+.pass-card.booked{background:linear-gradient(135deg,#fff3e0 0%,#ffe0b2 100%);border-color:#ffb74d;}
+
+.pass-number{font-size:12px;text-transform:uppercase;letter-spacing:1px;font-weight:700;color:#666;margin-bottom:8px;}
+.pass-status{font-size:24px;font-weight:700;margin-bottom:10px;}
+.pass-card.booked .pass-status{color:#ff9800;}
+.pass-card:not(.booked) .pass-status{color:#0066cc;}
+
+.pass-info{font-size:13px;color:#666;}
+.pass-name{font-weight:600;color:#333;margin-bottom:4px;}
+.pass-unit{color:#999;margin-bottom:2px;}
+.pass-dates{color:#999;font-size:12px;}
+
+.bookings-list{margin-top:20px;}
+.booking-item{background:#f9f9f9;padding:16px;border-radius:8px;border-left:4px solid #0066cc;margin-bottom:12px;display:flex;justify-content:space-between;align-items:center;gap:15px;}
+
+.booking-details h3{font-size:15px;font-weight:600;color:#1a1a1a;margin-bottom:6px;}
+.booking-details p{font-size:13px;color:#666;margin-bottom:3px;}
+.booking-details .meta{font-size:12px;color:#999;}
+
+.booking-pass{display:inline-block;background:#e3f2fd;color:#0066cc;padding:4px 10px;border-radius:4px;font-size:12px;font-weight:600;}
+.booking-platform{display:inline-block;background:#f0f0f0;color:#666;padding:4px 10px;border-radius:4px;font-size:12px;font-weight:600;margin-left:6px;}
+
+.remove-btn{padding:6px 12px;background:#ffebee;color:#c62828;border:none;border-radius:6px;font-size:13px;font-weight:600;cursor:pointer;transition:all 0.2s;}
+.remove-btn:hover{background:#ffcdd2;box-shadow:0 2px 6px rgba(198,40,40,0.2);}
+
+.empty-state{text-align:center;padding:30px;color:#999;font-size:14px;}
+.empty-state svg{margin-bottom:10px;opacity:0.5;}
+
+@media(max-width:600px){
+  .passes-container{grid-template-columns:1fr;}
+  .header h1{font-size:28px;}
+  .booking-item{flex-direction:column;align-items:flex-start;}
+}
+
+.stats{display:grid;grid-template-columns:1fr 1fr;gap:15px;margin-bottom:20px;}
+.stat{background:#f0f7ff;padding:16px;border-radius:8px;text-align:center;border:1px solid #d6ebff;}
+.stat-label{font-size:12px;color:#666;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:6px;}
+.stat-value{font-size:28px;font-weight:700;color:#0066cc;}
 </style>
 </head>
 <body>
-<div class="wrap">
-  <h1>Guest Parking Pass Tracker</h1>
-  <p class="sub">Internal only • 2 passes • $15/day • Cloud synced</p>
-  <div id="syncBadge" class="sync-badge online">🟢 Connected</div>
 
-  <div id="alertBar" class="alert-bar">
-    <div class="alert-title">Double booking detected</div>
-    <div id="alertBody"></div>
+<div class="container">
+  <div class="header">
+    <h1>🅿️ Parking Passes</h1>
+    <p>Pre-sell parking spots for your guests</p>
   </div>
 
-  <div class="metrics">
-    <div class="metric"><div class="ml">Total passes</div><div class="mv">2</div></div>
-    <div class="metric"><div class="ml">Active now</div><div class="mv" id="mBooked">0</div></div>
-    <div class="metric"><div class="ml">Available</div><div class="mv" id="mAvail">2</div></div>
-    <div class="metric"><div class="ml">Total earned</div><div class="mv green" id="mEarned">$0</div></div>
-    <div class="metric"><div class="ml">Upcoming income</div><div class="mv green" id="mUpcoming">$0</div></div>
-    <div class="metric"><div class="ml">Pending charges</div><div class="mv" style="color:#BA7517;" id="mPending">$0</div></div>
+  <!-- BOOKING FORM -->
+  <div class="section">
+    <div class="section-title">New Booking</div>
+    
+    <div class="form-group">
+      <label class="form-label">Guest Name</label>
+      <input type="text" class="form-input" id="guestName" placeholder="Enter guest name">
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">Unit</label>
+      <select class="form-select" id="unitSelect">
+        <option value="">-- Select unit --</option>
+        <option>91 Howe 402</option>
+        <option>91 Howe 202</option>
+        <option>91 Howe 403</option>
+        <option>91 Howe 404</option>
+        <option>91 Howe 206</option>
+        <option>100 Howe 401</option>
+        <option>1000 Howe 412</option>
+      </select>
+    </div>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+      <div class="form-group">
+        <label class="form-label">Check-in</label>
+        <input type="date" class="form-input" id="checkIn">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Check-out</label>
+        <input type="date" class="form-input" id="checkOut">
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">Platform</label>
+      <select class="form-select" id="platform">
+        <option value="">-- Select platform --</option>
+        <option value="Airbnb">Airbnb</option>
+        <option value="VRBO">VRBO</option>
+        <option value="Booking.com">Booking.com</option>
+      </select>
+    </div>
+
+    <button class="btn" onclick="addBooking()">Book Parking Pass</button>
   </div>
 
-  <div class="pass-vis" id="passVis"></div>
+  <!-- PASSES STATUS -->
+  <div class="section">
+    <div class="section-title">Parking Passes</div>
+    
+    <div class="stats">
+      <div class="stat">
+        <div class="stat-label">Total</div>
+        <div class="stat-value">2</div>
+      </div>
+      <div class="stat">
+        <div class="stat-label">Booked</div>
+        <div class="stat-value" id="bookedCount">0</div>
+      </div>
+    </div>
 
-  <div class="nav-row">
-    <button class="nav-tab on" onclick="showSec('book',this)">Book / Sell</button>
-    <button class="nav-tab" onclick="showSec('calendar',this)">Calendar</button>
-    <button class="nav-tab" onclick="showSec('active',this)">Active</button>
-    <button class="nav-tab" onclick="showSec('charge',this)">Charge tracking</button>
-    <button class="nav-tab" onclick="showSec('history',this)">History</button>
-  </div>
-
-  <!-- BOOK / SELL -->
-  <div id="sec-book" class="sec on">
-    <div class="card">
-      <div class="card-head">
-        <span class="card-title" id="formTitle">Book a guest</span>
-        <div class="ftabs">
-          <button class="ftab on" onclick="switchForm('book',this)">Book guest</button>
-          <button class="ftab" onclick="switchForm('sell',this)">Pre-sell pass</button>
-        </div>
+    <div class="passes-container">
+      <div class="pass-card" id="pass1Card">
+        <div class="pass-number">Pass #1</div>
+        <div class="pass-status">Available</div>
+        <div class="pass-info" style="color:#999;">Ready to book</div>
       </div>
-      <div class="form-grid">
-        <div class="fg"><label id="lName">Guest name</label><input type="text" id="fName" placeholder="Full name"></div>
-        <div class="fg"><label>Unit</label>
-          <select id="fUnit">
-            <option value="">-- Select unit --</option>
-            <option>91 Howe 402</option><option>91 Howe 202</option><option>91 Howe 403</option>
-            <option>91 Howe 404</option><option>91 Howe 206</option><option>100 Howe 401</option>
-            <option>1000 Howe 412</option>
-          </select>
-        </div>
-        <div class="fg"><label id="lStart">Check-in</label><input type="date" id="fStart"></div>
-        <div class="fg"><label id="lEnd">Check-out</label><input type="date" id="fEnd"></div>
+      <div class="pass-card" id="pass2Card">
+        <div class="pass-number">Pass #2</div>
+        <div class="pass-status">Available</div>
+        <div class="pass-info" style="color:#999;">Ready to book</div>
       </div>
-      <div class="form-grid3" style="margin-bottom:10px;">
-        <div class="fg" style="margin-bottom:0;"><label>Days</label><input type="text" id="fDays" readonly placeholder="—"></div>
-        <div class="fg" style="margin-bottom:0;"><label>Income ($15/day)</label><input type="text" id="fIncome" readonly placeholder="—"></div>
-        <div class="fg" style="margin-bottom:0;"><label>Platform</label>
-          <select id="fPlatform">
-            <option value="">-- Platform --</option>
-            <option value="Hostaway">Hostaway</option>
-            <option value="Airbnb">Airbnb</option>
-            <option value="Direct">Direct</option>
-          </select>
-        </div>
-      </div>
-      <div id="fWarn" class="warn-txt"></div>
-      <div id="fOk" class="ok-txt">✓ All passes available for these dates.</div>
-      <div class="btn-row"><button class="btn pri" id="fBtn" onclick="submitForm()">Add booking</button></div>
     </div>
   </div>
 
-  <!-- CALENDAR -->
-  <div id="sec-calendar" class="sec">
-    <div class="card">
-      <div class="card-title" style="margin-bottom:12px;">Booking calendar</div>
-      <div class="cal-nav">
-        <button class="btn sml" onclick="calPrev()">← Previous</button>
-        <span id="calTitle"></span>
-        <button class="btn sml" onclick="calNext()">Next →</button>
-      </div>
-      <div class="legend">
-        <span><span class="leg-dot" style="background:#E6F1FB;"></span>Booking</span>
-        <span><span class="leg-dot" style="background:#E1F5EE;"></span>Pre-sold</span>
-        <span><span class="leg-dot" style="background:#FCEBEB;"></span>Conflict</span>
-      </div>
-      <div class="cal-grid" id="calNames"></div>
-      <div class="cal-grid" id="calGrid"></div>
-    </div>
-  </div>
-
-  <!-- ACTIVE -->
-  <div id="sec-active" class="sec">
-    <div class="card">
-      <div class="card-title" style="margin-bottom:12px;">Active bookings &amp; pre-sales</div>
-      <div id="activeList"></div>
-    </div>
-  </div>
-
-  <!-- CHARGE TRACKING -->
-  <div id="sec-charge" class="sec">
-    <div class="card">
-      <div class="card-head"><span class="card-title">Charge tracking</span></div>
-      <p style="font-size:13px;color:#888;margin-bottom:14px;">Record parking charges processed through platforms.</p>
-      <div class="form-grid">
-        <div class="fg"><label>Guest name</label><input type="text" id="cName" placeholder="Full name"></div>
-        <div class="fg"><label>Unit</label>
-          <select id="cUnit">
-            <option value="">-- Select unit --</option>
-            <option>91 Howe 402</option><option>91 Howe 202</option><option>91 Howe 403</option>
-            <option>91 Howe 404</option><option>91 Howe 206</option><option>100 Howe 401</option>
-            <option>1000 Howe 412</option>
-          </select>
-        </div>
-        <div class="fg"><label>Charge date</label><input type="date" id="cDate"></div>
-        <div class="fg"><label>Platform</label>
-          <select id="cPlatform">
-            <option value="">-- Select --</option>
-            <option value="Hostaway">Hostaway</option>
-            <option value="Airbnb">Airbnb</option>
-          </select>
-        </div>
-        <div class="fg"><label>Days parked</label><input type="number" id="cDays" min="1" placeholder="e.g. 3"></div>
-        <div class="fg"><label>Amount ($15/day)</label><input type="text" id="cAmount" readonly placeholder="—"></div>
-      </div>
-      <div class="fg"><label>Notes (optional)</label><input type="text" id="cNotes" placeholder="e.g. reservation #12345"></div>
-      <div class="btn-row"><button class="btn pri" onclick="addCharge()">Record charge</button></div>
-    </div>
-    <div class="card">
-      <div class="card-title" style="margin-bottom:12px;">Charge records</div>
-      <div id="chargeList"></div>
-    </div>
-  </div>
-
-  <!-- HISTORY -->
-  <div id="sec-history" class="sec">
-    <div class="card">
-      <div class="card-head">
-        <span class="card-title">History</span>
-        <button class="btn sml red" onclick="resetAll()">Clear all</button>
-      </div>
-      <table class="htable">
-        <thead><tr>
-          <th style="width:16%">Name</th><th style="width:16%">Unit</th>
-          <th style="width:20%">Dates</th><th style="width:7%">Days</th>
-          <th style="width:10%">Income</th><th style="width:12%">Platform</th>
-          <th style="width:10%">Type</th><th style="width:9%"></th>
-        </tr></thead>
-        <tbody id="histBody"></tbody>
-      </table>
+  <!-- CURRENT BOOKINGS -->
+  <div class="section">
+    <div class="section-title">Current Bookings</div>
+    <div class="bookings-list" id="bookingsList">
+      <div class="empty-state">No bookings yet</div>
     </div>
   </div>
 </div>
@@ -249,12 +167,6 @@ h1{font-size:18px;font-weight:500;margin-bottom:2px;}
 <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js"></script>
 
 <script>
-const RATE=15, PASSES=2;
-let db;
-let formMode='book';
-let calYear, calMonth;
-let isOnline=true;
-
 const firebaseConfig = {
   apiKey: "AIzaSyAcaTiqbuucW0E865PSTmCiuSgjgo8KyRE",
   authDomain: "parking-tracker-2223d.firebaseapp.com",
@@ -264,64 +176,20 @@ const firebaseConfig = {
   appId: "1:317250361483:web:cea1e163749adaa8eb5c8e"
 };
 
+let db;
+
 try{
   firebase.initializeApp(firebaseConfig);
   db = firebase.firestore();
   db.settings({experimentalForceLongPolling:true});
-  console.log("Firebase initialized successfully");
-  setupRealtimeListeners();
+  setupListeners();
 } catch(e){
-  console.error("Firebase init error:", e);
-  updateSyncStatus("error", "Firebase init failed");
+  alert("Firebase error: " + e.message);
 }
 
-function setupRealtimeListeners() {
+function setupListeners() {
   if(!db) return;
-  
-  db.collection('bookings').onSnapshot(snap => {
-    console.log("Bookings updated:", snap.size);
-    renderAll();
-  }, err => {
-    console.error("Bookings listener error:", err);
-  });
-  
-  db.collection('presales').onSnapshot(snap => {
-    console.log("Presales updated:", snap.size);
-    renderAll();
-  }, err => {
-    console.error("Presales listener error:", err);
-  });
-  
-  db.collection('sales').onSnapshot(snap => {
-    console.log("Sales updated:", snap.size);
-    renderAll();
-  }, err => {
-    console.error("Sales listener error:", err);
-  });
-  
-  db.collection('charges').onSnapshot(snap => {
-    console.log("Charges updated:", snap.size);
-    renderAll();
-  }, err => {
-    console.error("Charges listener error:", err);
-  });
-}
-
-window.addEventListener('online', () => {isOnline=true; updateSyncStatus("online");});
-window.addEventListener('offline', () => {isOnline=false; updateSyncStatus("offline");});
-
-function updateSyncStatus(status, msg) {
-  const badge = document.getElementById('syncBadge');
-  if(status === 'online') {
-    badge.textContent = '🟢 Connected';
-    badge.className = 'sync-badge online';
-  } else if(status === 'offline') {
-    badge.textContent = '🔴 Offline';
-    badge.className = 'sync-badge offline';
-  } else if(status === 'error') {
-    badge.textContent = '⚠️ ' + (msg || 'Error');
-    badge.className = 'sync-badge error';
-  }
+  db.collection('bookings').onSnapshot(() => render());
 }
 
 function todayStr() {
@@ -329,497 +197,148 @@ function todayStr() {
   return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
 }
 
-function calcDays(a,b) {
+function calcDays(a, b) {
   if(!a||!b) return 0;
-  const d1=new Date(a), d2=new Date(b);
+  const d1 = new Date(a), d2 = new Date(b);
   if(isNaN(d1)||isNaN(d2)) return 0;
-  const diff = Math.round((d2-d1)/86400000);
-  return diff>0?diff:0;
+  return Math.round((d2-d1)/86400000);
 }
 
-function fmt(n) {
-  return '$' + (Math.round(n)).toLocaleString();
-}
-
-function datesOverlap(s1,e1,s2,e2) {
-  return s1<e2&&e1>s2;
+function datesOverlap(s1, e1, s2, e2) {
+  return s1 < e2 && e1 > s2;
 }
 
 async function getBookings() {
-  try {
+  try{
     const snap = await db.collection('bookings').get();
-    const data = snap.docs.map(d => ({id:d.id, ...d.data()}));
-    console.log("Got bookings:", data.length);
-    return data;
-  } catch(e) {
-    console.error("Get bookings error:", e);
+    return snap.docs.map(d => ({id:d.id, ...d.data()}));
+  } catch(e){
+    console.error(e);
     return [];
   }
 }
 
-async function getPresales() {
-  try {
-    const snap = await db.collection('presales').get();
-    const data = snap.docs.map(d => ({id:d.id, ...d.data()}));
-    console.log("Got presales:", data.length);
-    return data;
-  } catch(e) {
-    console.error("Get presales error:", e);
-    return [];
-  }
-}
+async function addBooking() {
+  const name = document.getElementById('guestName').value.trim();
+  const unit = document.getElementById('unitSelect').value;
+  const checkIn = document.getElementById('checkIn').value;
+  const checkOut = document.getElementById('checkOut').value;
+  const platform = document.getElementById('platform').value;
 
-async function getCharges() {
-  try {
-    const snap = await db.collection('charges').get();
-    const data = snap.docs.map(d => ({id:d.id, ...d.data()}));
-    console.log("Got charges:", data.length);
-    return data;
-  } catch(e) {
-    console.error("Get charges error:", e);
-    return [];
+  if(!name||!unit||!checkIn||!checkOut||!platform) {
+    alert('Please fill all fields');
+    return;
   }
-}
 
-async function getSales() {
-  try {
-    const snap = await db.collection('sales').get();
-    const data = snap.docs.map(d => ({id:d.id, ...d.data()}));
-    console.log("Got sales:", data.length);
-    return data;
-  } catch(e) {
-    console.error("Get sales error:", e);
-    return [];
+  const days = calcDays(checkIn, checkOut);
+  if(days <= 0) {
+    alert('Check-out date must be after check-in');
+    return;
   }
-}
 
-async function getConflicts() {
   const bookings = await getBookings();
-  const presales = await getPresales();
-  const all = [
-    ...bookings.map(b => ({id:b.id, name:b.guestName, checkIn:b.checkIn, checkOut:b.checkOut})),
-    ...presales.map(s => ({id:s.id, name:s.guestName, checkIn:s.startDate, checkOut:s.endDate}))
-  ];
-  const out = [];
-  for(let i=0; i<all.length; i++) {
-    for(let j=i+1; j<all.length; j++) {
-      if(datesOverlap(all[i].checkIn, all[i].checkOut, all[j].checkIn, all[j].checkOut)) {
-        out.push({a:all[i], b:all[j]});
-      }
-    }
+  const now = new Date();
+  const active = bookings.filter(b => new Date(b.checkOut) > now);
+  const conflicts = active.filter(b => datesOverlap(checkIn, checkOut, b.checkIn, b.checkOut));
+
+  if(conflicts.length >= 2) {
+    alert('Both passes are booked for these dates');
+    return;
   }
-  return out;
-}
 
-async function conflictsForNew(start, end) {
-  const bookings = await getBookings();
-  const presales = await getPresales();
-  const all = [
-    ...bookings.map(b => ({id:b.id, name:b.guestName, checkIn:b.checkIn, checkOut:b.checkOut})),
-    ...presales.map(s => ({id:s.id, name:s.guestName, checkIn:s.startDate, checkOut:s.endDate}))
-  ];
-  return all.filter(x => datesOverlap(start, end, x.checkIn, x.checkOut));
-}
-
-async function updateCalc() {
-  const s = document.getElementById('fStart').value;
-  const e = document.getElementById('fEnd').value;
-  const days = calcDays(s, e);
-  document.getElementById('fDays').value = days>0?days:'';
-  document.getElementById('fIncome').value = days>0?fmt(days*RATE):'';
-  const w = document.getElementById('fWarn');
-  const ok = document.getElementById('fOk');
-  w.style.display = 'none';
-  ok.style.display = 'none';
-  if(days>0) {
-    const cf = await conflictsForNew(s, e);
-    if(cf.length>=PASSES) {
-      w.textContent = 'Both passes already booked. Cannot add.';
-      w.style.display = 'block';
-    } else if(cf.length===1) {
-      w.textContent = 'Warning: 1 pass already booked. Only 1 available.';
-      w.style.display = 'block';
-    } else {
-      ok.style.display = 'block';
-    }
-  }
-}
-
-function updateChargeCalc() {
-  const days = parseInt(document.getElementById('cDays').value)||0;
-  document.getElementById('cAmount').value = days>0?fmt(days*RATE):'';
-}
-
-function switchForm(mode, btn) {
-  formMode = mode;
-  document.querySelectorAll('.ftabs .ftab').forEach(t=>t.classList.remove('on'));
-  btn.classList.add('on');
-  const isBook = mode==='book';
-  document.getElementById('formTitle').textContent = isBook?'Book a guest':'Pre-sell parking pass';
-  document.getElementById('lName').textContent = isBook?'Guest name':'Buyer name';
-  document.getElementById('lStart').textContent = isBook?'Check-in':'Start date';
-  document.getElementById('lEnd').textContent = isBook?'Check-out':'End date';
-  document.getElementById('fBtn').textContent = isBook?'Add booking':'Record sale';
-}
-
-function showSec(id, btn) {
-  document.querySelectorAll('.sec').forEach(p=>p.classList.remove('on'));
-  document.querySelectorAll('.nav-tab').forEach(t=>t.classList.remove('on'));
-  document.getElementById('sec-'+id).classList.add('on');
-  btn.classList.add('on');
-  if(id==='calendar') renderCal();
-  if(id==='active') renderActive();
-  if(id==='history') renderHistory();
-  if(id==='charge') renderCharges();
-}
-
-async function submitForm() {
-  const name = document.getElementById('fName').value.trim();
-  const unit = document.getElementById('fUnit').value;
-  const start = document.getElementById('fStart').value;
-  const end = document.getElementById('fEnd').value;
-  const platform = document.getElementById('fPlatform').value;
-  
-  if(!name||!unit||!start||!end) {alert('Please fill all required fields'); return;}
-  
-  const days = calcDays(start, end);
-  if(days<=0) {alert('Check-out must be after check-in'); return;}
-  
-  const cf = await conflictsForNew(start, end);
-  if(cf.length>=PASSES) {alert('Both passes are already booked during this period.'); return;}
-  
-  const income = days*RATE;
-  const btn = document.getElementById('fBtn');
-  btn.disabled = true;
-  btn.textContent = 'Saving...';
-  
-  try {
-    if(formMode==='book') {
-      await db.collection('bookings').add({
-        guestName:name, unit, checkIn:start, checkOut:end, days, income, 
-        platform:platform||'', addedDate:todayStr()
-      });
-    } else {
-      await db.collection('presales').add({
-        guestName:name, unit, startDate:start, endDate:end, days, income,
-        platform:platform||'', date:todayStr()
-      });
-    }
-    
-    document.getElementById('fName').value = '';
-    document.getElementById('fUnit').value = '';
-    document.getElementById('fPlatform').value = '';
-    document.getElementById('fDays').value = '';
-    document.getElementById('fIncome').value = '';
-    document.getElementById('fWarn').style.display = 'none';
-    document.getElementById('fOk').style.display = 'none';
-    initDates();
-    showToast((formMode==='book'?'✓ Booking added':'✓ Pass pre-sold')+' — '+fmt(income));
-  } catch(e) {
-    console.error("Submit error:", e);
-    alert('Error: ' + e.message);
-  } finally {
-    btn.disabled = false;
-    btn.textContent = formMode==='book'?'Add booking':'Record sale';
-  }
-}
-
-async function addCharge() {
-  const name = document.getElementById('cName').value.trim();
-  const unit = document.getElementById('cUnit').value;
-  const date = document.getElementById('cDate').value;
-  const platform = document.getElementById('cPlatform').value;
-  const days = parseInt(document.getElementById('cDays').value)||0;
-  const notes = document.getElementById('cNotes').value.trim();
-  
-  if(!name||!unit||!date||!platform||days<=0) {alert('Please fill all required fields'); return;}
-  
-  const amount = days*RATE;
-  try {
-    await db.collection('charges').add({
-      guestName:name, unit, date, platform, days, amount, notes:notes||'', status:'pending'
+  try{
+    await db.collection('bookings').add({
+      guestName: name,
+      unit,
+      checkIn,
+      checkOut,
+      platform,
+      days,
+      addedDate: todayStr()
     });
-    document.getElementById('cName').value = '';
-    document.getElementById('cUnit').value = '';
-    document.getElementById('cPlatform').value = '';
-    document.getElementById('cDays').value = '';
-    document.getElementById('cAmount').value = '';
-    document.getElementById('cNotes').value = '';
-    showToast('✓ Charge recorded: '+fmt(amount));
-  } catch(e) {
-    console.error("Add charge error:", e);
-    alert('Error: '+e.message);
-  }
-}
 
-async function toggleChargeStatus(id) {
-  try {
-    const doc = await db.collection('charges').doc(id).get();
-    const status = doc.data().status==='pending'?'paid':'pending';
-    await db.collection('charges').doc(id).update({status});
+    document.getElementById('guestName').value = '';
+    document.getElementById('unitSelect').value = '';
+    document.getElementById('checkIn').value = '';
+    document.getElementById('checkOut').value = '';
+    document.getElementById('platform').value = '';
+    initDates();
+    showSuccess('✓ ' + name + ' booked for ' + days + ' day' + (days !== 1 ? 's' : ''));
   } catch(e) {
-    console.error("Toggle error:", e);
-  }
-}
-
-async function deleteCharge(id) {
-  if(!confirm('Delete this charge?')) return;
-  try {
-    await db.collection('charges').doc(id).delete();
-  } catch(e) {
-    console.error("Delete charge error:", e);
+    alert('Error: ' + e.message);
   }
 }
 
 async function removeBooking(id) {
-  try {
-    const doc = await db.collection('bookings').doc(id).get();
-    const data = doc.data();
+  if(!confirm('Remove this booking?')) return;
+  try{
     await db.collection('bookings').doc(id).delete();
-    await db.collection('sales').add({...data, id:undefined, type:'checkout', checkedOutDate:todayStr()});
-    showToast(data.guestName+' checked out — '+fmt(data.income));
   } catch(e) {
-    console.error("Remove booking error:", e);
+    alert('Error: ' + e.message);
   }
 }
 
-async function deleteSale(id) {
-  if(!confirm('Delete this record?')) return;
-  try {
-    await db.collection('sales').doc(id).delete();
-  } catch(e) {
-    console.error("Delete sale error:", e);
-  }
-}
-
-function platBadge(p) {
-  if(!p) return '';
-  const cls = p==='Hostaway'?'b-purple':p==='Airbnb'?'b-red':'b-gray';
-  return '<span class="badge '+cls+'">'+p+'</span>';
-}
-
-async function renderMetrics() {
+async function render() {
   const bookings = await getBookings();
-  const presales = await getPresales();
-  const sales = await getSales();
-  const charges = await getCharges();
   const now = new Date();
-  const activeB = bookings.filter(b => new Date(b.checkOut)>now);
-  const earned = sales.reduce((s,x) => s+(x.income||0), 0);
-  const upcoming = activeB.reduce((s,b) => s+calcDays(todayStr(),b.checkOut)*RATE, 0);
-  const pending = charges.filter(c => c.status==='pending').reduce((s,c) => s+(c.amount||0), 0);
-  
-  document.getElementById('mBooked').textContent = activeB.length;
-  document.getElementById('mAvail').textContent = PASSES-activeB.length;
-  document.getElementById('mEarned').textContent = fmt(earned);
-  document.getElementById('mUpcoming').textContent = fmt(upcoming);
-  document.getElementById('mPending').textContent = fmt(pending);
-  
-  console.log(`Metrics: booked=${activeB.length}, available=${PASSES-activeB.length}, earned=$${earned}, upcoming=$${upcoming}, pending=$${pending}`);
-}
+  const active = bookings.filter(b => new Date(b.checkOut) > now).sort((a,b) => new Date(a.checkOut) - new Date(b.checkOut));
 
-async function renderPassVis() {
-  const bookings = await getBookings();
-  const presales = await getPresales();
-  const now = new Date();
-  const activeB = bookings.filter(b => new Date(b.checkOut)>now);
-  const activeSales = presales.filter(s => new Date(s.endDate)>now);
-  const all = [
-    ...activeB.map(b => ({name:b.guestName, unit:b.unit, end:b.checkOut, type:'booking', id:b.id})),
-    ...activeSales.map(s => ({name:s.guestName, unit:s.unit, end:s.endDate, type:'presale', id:s.id}))
-  ];
-  const cf = await getConflicts();
-  const cIds = new Set();
-  cf.forEach(c => {cIds.add(c.a.id); cIds.add(c.b.id);});
-  
+  document.getElementById('bookedCount').textContent = active.length;
+
+  // Update pass cards
+  const pass1 = active[0];
+  const pass2 = active[1];
+
+  document.getElementById('pass1Card').className = pass1 ? 'pass-card booked' : 'pass-card';
+  document.getElementById('pass1Card').innerHTML = '<div class="pass-number">Pass #1</div>' +
+    '<div class="pass-status">' + (pass1 ? 'BOOKED' : 'Available') + '</div>' +
+    (pass1 ? '<div class="pass-info"><div class="pass-name">' + pass1.guestName + '</div><div class="pass-unit">' + pass1.unit + '</div><div class="pass-dates">' + pass1.checkIn + ' → ' + pass1.checkOut + '</div></div>' : '<div class="pass-info" style="color:#999;">Ready to book</div>');
+
+  document.getElementById('pass2Card').className = pass2 ? 'pass-card booked' : 'pass-card';
+  document.getElementById('pass2Card').innerHTML = '<div class="pass-number">Pass #2</div>' +
+    '<div class="pass-status">' + (pass2 ? 'BOOKED' : 'Available') + '</div>' +
+    (pass2 ? '<div class="pass-info"><div class="pass-name">' + pass2.guestName + '</div><div class="pass-unit">' + pass2.unit + '</div><div class="pass-dates">' + pass2.checkIn + ' → ' + pass2.checkOut + '</div></div>' : '<div class="pass-info" style="color:#999;">Ready to book</div>');
+
+  // Update bookings list
   let html = '';
-  for(let i=0; i<PASSES; i++) {
-    const slot = all[i];
-    const isCfl = slot&&cIds.has(slot.id);
-    if(slot) {
-      html += '<div class="pass-slot '+(isCfl?'conflict-slot':'used')+'">'
-        +'<div class="ps-label">Pass '+(i+1)+(isCfl?' — CONFLICT':'')+'</div>'
-        +'<div class="ps-val">'+slot.name+'</div>'
-        +'<div class="ps-det">'+slot.unit+' • until '+slot.end+'</div></div>';
-    } else {
-      html += '<div class="pass-slot"><div class="ps-label">Pass '+(i+1)+'</div><div class="ps-val" style="color:#aaa;">Available</div></div>';
-    }
+  if(active.length === 0) {
+    html = '<div class="empty-state">No active bookings</div>';
+  } else {
+    active.forEach((b, i) => {
+      html += '<div class="booking-item">' +
+        '<div class="booking-details">' +
+        '<h3>' + b.guestName + '</h3>' +
+        '<p>' + b.unit + '</p>' +
+        '<p class="meta">' + b.checkIn + ' → ' + b.checkOut + ' (' + b.days + ' days)</p>' +
+        '<span class="booking-pass">Pass #' + (i+1) + '</span>' +
+        '<span class="booking-platform">' + b.platform + '</span>' +
+        '</div>' +
+        '<button class="remove-btn" onclick="removeBooking(\'' + b.id + '\')">Remove</button>' +
+        '</div>';
+    });
   }
-  document.getElementById('passVis').innerHTML = html;
+  document.getElementById('bookingsList').innerHTML = html;
 }
-
-async function renderConflictAlert() {
-  const cf = await getConflicts();
-  const bar = document.getElementById('alertBar');
-  if(!cf.length) {bar.classList.remove('show'); return;}
-  bar.classList.add('show');
-  document.getElementById('alertBody').innerHTML = cf.map(c => '<div class="alert-item">'+c.a.name+' ('+c.a.checkIn+'–'+c.a.checkOut+') overlaps with '+c.b.name+' ('+c.b.checkIn+'–'+c.b.checkOut+')</div>').join('');
-}
-
-async function renderActive() {
-  const bookings = await getBookings();
-  const presales = await getPresales();
-  const now = new Date();
-  const activeB = bookings.filter(b => new Date(b.checkOut)>now).sort((a,b) => new Date(a.checkOut)-new Date(b.checkOut));
-  const activeSales = presales.filter(s => new Date(s.endDate)>now).sort((a,b) => new Date(a.endDate)-new Date(b.endDate));
-  const all = [
-    ...activeB.map(x => ({...x, _type:'booking', _start:x.checkIn, _end:x.checkOut})),
-    ...activeSales.map(x => ({...x, _type:'presale', _start:x.startDate, _end:x.endDate}))
-  ];
-  const el = document.getElementById('activeList');
-  if(!all.length) {el.innerHTML = '<div class="empty">No active bookings or pre-sales</div>'; return;}
-  const cf = await getConflicts();
-  const cIds = new Set();
-  cf.forEach(c => {cIds.add(c.a.id); cIds.add(c.b.id);});
-  el.innerHTML = all.map(function(b) {
-    const dLeft = Math.max(0, Math.ceil((new Date(b._end)-new Date())/86400000));
-    const isCfl = cIds.has(b.id);
-    const typeBadge = b._type==='booking'?'<span class="badge b-blue">Booking</span>':'<span class="badge b-green">Pre-sold</span>';
-    const btn = b._type==='booking'?'<button class="btn sml red" onclick="removeBooking(\''+b.id+'\')">Checkout</button>':'';
-    return '<div class="brow'+(isCfl?' cfl':'')+'"><div>'
-      +'<div class="bname">'+b.guestName+'</div>'
-      +'<div class="bdet">'+b.unit+' • '+b._start+' to '+b._end+'</div></div>'
-      +'<div class="bacts">'+(isCfl?'<span class="badge b-red">CONFLICT</span>':'')+typeBadge
-      +platBadge(b.platform||'')
-      +'<span class="badge b-amber">'+dLeft+'d</span>'
-      +'<span class="badge b-green">'+fmt(b.income||0)+'</span>'+btn+'</div></div>';
-  }).join('');
-}
-
-async function renderCharges() {
-  const charges = await getCharges();
-  const el = document.getElementById('chargeList');
-  if(!charges.length) {el.innerHTML = '<div class="empty">No charges recorded yet</div>'; return;}
-  const pending = charges.filter(c => c.status==='pending').reduce((s,c) => s+c.amount, 0);
-  const paid = charges.filter(c => c.status==='paid').reduce((s,c) => s+c.amount, 0);
-  let html = '<div class="summary-box">'
-    +'<div class="summary-row"><span>Pending</span><span style="color:#BA7517;">'+fmt(pending)+'</span></div>'
-    +'<div class="summary-row"><span>Paid</span><span style="color:#0F6E56;">'+fmt(paid)+'</span></div>'
-    +'<div class="summary-row"><span>Total</span><span>'+fmt(pending+paid)+'</span></div></div>';
-  html += [...charges].reverse().map(function(c) {
-    return '<div class="brow"><div>'
-      +'<div class="bname">'+c.guestName+'</div>'
-      +'<div class="bdet">'+c.unit+' • '+c.date+' • '+c.days+'d</div></div>'
-      +'<div class="bacts">'+platBadge(c.platform)
-      +'<span class="badge b-green">'+fmt(c.amount)+'</span>'
-      +'<button class="btn sml" onclick="toggleChargeStatus(\''+c.id+'\')" style="color:'+(c.status==='paid'?'#0F6E56':'#BA7517')+';">'+(c.status==='paid'?'Paid':'Pending')+'</button>'
-      +'<button class="btn sml red" onclick="deleteCharge(\''+c.id+'\')">Del</button></div></div>';
-  }).join('');
-  el.innerHTML = html;
-}
-
-async function renderHistory() {
-  const sales = await getSales();
-  const tbody = document.getElementById('histBody');
-  if(!sales.length) {tbody.innerHTML = '<tr><td colspan="8" class="empty">No history yet</td></tr>'; return;}
-  tbody.innerHTML = [...sales].reverse().map(function(s) {
-    return '<tr><td>'+s.guestName+'</td><td>'+s.unit+'</td>'
-      +'<td style="font-size:11px;">'+(s.startDate||s.checkIn||'—')+' → '+(s.endDate||s.checkOut||'—')+'</td>'
-      +'<td>'+(s.days||'—')+'</td>'
-      +'<td style="color:#0F6E56;font-weight:500;">'+(s.income?fmt(s.income):'—')+'</td>'
-      +'<td>'+platBadge(s.platform||'')+'</td>'
-      +'<td><span class="badge '+(s.type==='presale'?'b-green':s.type==='checkout'?'b-blue':'b-amber')+'">'+(s.type==='presale'?'Pre-sold':s.type==='checkout'?'Checkout':'Sale')+'</span></td>'
-      +'<td><button class="btn sml red" onclick="deleteSale(\''+s.id+'\')">Del</button></td></tr>';
-  }).join('');
-}
-
-async function renderCal() {
-  const bookings = await getBookings();
-  const presales = await getPresales();
-  const allRanges = [
-    ...bookings.map(b => ({start:b.checkIn, end:b.checkOut, name:b.guestName, type:'booking', id:b.id})),
-    ...presales.map(s => ({start:s.startDate, end:s.endDate, name:s.guestName, type:'presale', id:s.id}))
-  ];
-  const cf = await getConflicts();
-  const cDates = new Set();
-  cf.forEach(function(c) {
-    let cur = new Date(c.a.checkIn>c.b.checkIn?c.a.checkIn:c.b.checkIn);
-    const endD = new Date(c.a.checkOut<c.b.checkOut?c.a.checkOut:c.b.checkOut);
-    while(cur<endD) {
-      cDates.add(cur.getFullYear()+'-'+String(cur.getMonth()+1).padStart(2,'0')+'-'+String(cur.getDate()).padStart(2,'0'));
-      cur = new Date(cur.getTime()+86400000);
-    }
-  });
-  
-  document.getElementById('calNames').innerHTML = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'].map(n => '<div class="cal-dname">'+n+'</div>').join('');
-  const firstDay = new Date(calYear, calMonth, 1);
-  const lastDay = new Date(calYear, calMonth+1, 0);
-  document.getElementById('calTitle').textContent = firstDay.toLocaleString('default', {month:'long', year:'numeric'});
-  
-  const ts = todayStr();
-  let html = '';
-  for(let i=0; i<firstDay.getDay(); i++) html += '<div class="cal-day past"></div>';
-  for(let day=1; day<=lastDay.getDate(); day++) {
-    const ds = calYear+'-'+String(calMonth+1).padStart(2,'0')+'-'+String(day).padStart(2,'0');
-    const isToday = ds===ts;
-    const isPast = ds<ts&&!isToday;
-    const dayRanges = allRanges.filter(r => ds>=r.start&&ds<r.end);
-    const isCfl = cDates.has(ds);
-    const pips = dayRanges.map(r => '<div class="cal-pip '+(isCfl?'pip-c':r.type==='booking'?'pip-b':'pip-s')+'">'+r.name.split(' ')[0]+'</div>').join('');
-    html += '<div class="cal-day'+(isToday?' today-cell':'')+(isPast?' past':'')+'"><div class="cal-day-num">'+day+'</div>'+pips+'</div>';
-  }
-  document.getElementById('calGrid').innerHTML = html;
-}
-
-function calPrev() {calMonth--; if(calMonth<0) {calMonth=11; calYear--;} renderCal();}
-function calNext() {calMonth++; if(calMonth>11) {calMonth=0; calYear++;} renderCal();}
 
 function initDates() {
   const t = new Date();
-  const tm = new Date(t.getTime()+86400000);
-  const f = function(d) {return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');};
-  document.getElementById('fStart').value = f(t);
-  document.getElementById('fEnd').value = f(tm);
-  document.getElementById('cDate').value = f(t);
-  updateCalc();
+  const tm = new Date(t.getTime() + 86400000);
+  const f = (d) => d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
+  document.getElementById('checkIn').value = f(t);
+  document.getElementById('checkOut').value = f(tm);
 }
 
-async function renderAll() {
-  await renderMetrics();
-  await renderPassVis();
-  await renderConflictAlert();
-  if(document.getElementById('sec-active').classList.contains('on')) await renderActive();
-  if(document.getElementById('sec-history').classList.contains('on')) await renderHistory();
-  if(document.getElementById('sec-calendar').classList.contains('on')) await renderCal();
-  if(document.getElementById('sec-charge').classList.contains('on')) await renderCharges();
+function showSuccess(msg) {
+  const toast = document.createElement('div');
+  toast.style.cssText = 'position:fixed;bottom:20px;right:20px;background:#4caf50;color:white;padding:14px 20px;border-radius:8px;font-size:14px;font-weight:600;z-index:9999;box-shadow:0 4px 12px rgba(76,175,80,0.3);';
+  toast.textContent = msg;
+  document.body.appendChild(toast);
+  setTimeout(() => toast.remove(), 3000);
 }
 
-function showToast(msg) {
-  const t = document.createElement('div');
-  t.style.cssText = 'position:fixed;bottom:20px;right:20px;background:#1a1a1a;color:#fff;padding:10px 16px;border-radius:8px;font-size:13px;z-index:9999;animation:slideIn 0.3s';
-  t.textContent = msg;
-  document.body.appendChild(t);
-  setTimeout(function(){t.remove();}, 3500);
-}
-
-async function resetAll() {
-  if(!confirm('Clear all data? Cannot be undone.')) return;
-  try {
-    const batch = db.batch();
-    (await db.collection('bookings').get()).docs.forEach(d => batch.delete(d.ref));
-    (await db.collection('presales').get()).docs.forEach(d => batch.delete(d.ref));
-    (await db.collection('sales').get()).docs.forEach(d => batch.delete(d.ref));
-    (await db.collection('charges').get()).docs.forEach(d => batch.delete(d.ref));
-    await batch.commit();
-    showToast('All data cleared');
-  } catch(e) {
-    console.error("Reset error:", e);
-    alert('Error: '+e.message);
-  }
-}
-
-document.getElementById('fStart').addEventListener('change', updateCalc);
-document.getElementById('fEnd').addEventListener('change', updateCalc);
-document.getElementById('cDays').addEventListener('input', updateChargeCalc);
-
-const now = new Date();
-calYear = now.getFullYear();
-calMonth = now.getMonth();
 initDates();
-
-console.log("App initialized. Firebase config loaded.");
-renderAll();
-updateSyncStatus("online");
+render();
 </script>
+
 </body>
 </html>
