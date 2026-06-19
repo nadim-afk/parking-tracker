@@ -10,6 +10,9 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;backgrou
 .wrap{max-width:940px;margin:0 auto;padding:20px;}
 h1{font-size:18px;font-weight:500;margin-bottom:2px;}
 .sub{font-size:12px;color:#888;margin-bottom:14px;}
+.sync-badge{display:inline-block;padding:4px 8px;border-radius:4px;font-size:11px;margin-bottom:14px;}
+.sync-badge.online{background:#E1F5EE;color:#085041;}
+.sync-badge.offline{background:#FCEBEB;color:#791F1F;}
 .metrics{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:9px;margin-bottom:14px;}
 .metric{background:#f0f0ee;border-radius:8px;padding:12px 14px;}
 .ml{font-size:11px;color:#888;margin-bottom:5px;}
@@ -38,6 +41,7 @@ h1{font-size:18px;font-weight:500;margin-bottom:2px;}
 .btn.pri{background:#0066cc;color:#fff;border-color:#0066cc;}
 .btn.sml{font-size:12px;padding:5px 10px;}
 .btn.red{color:#A32D2D;}
+.btn:disabled{opacity:0.5;cursor:not-allowed;}
 .btn-row{display:flex;gap:8px;margin-top:6px;}
 .pass-vis{display:flex;gap:10px;margin-bottom:12px;}
 .pass-slot{flex:1;border:0.5px solid #e0e0e0;border-radius:8px;padding:10px 12px;background:#fff;}
@@ -68,28 +72,32 @@ h1{font-size:18px;font-weight:500;margin-bottom:2px;}
 .htable th{text-align:left;padding:7px 6px;border-bottom:0.5px solid #e0e0e0;color:#666;font-weight:500;}
 .htable td{padding:7px 6px;border-bottom:0.5px solid #e0e0e0;vertical-align:middle;}
 .cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:3px;margin-top:6px;}
-.cal-dname{font-size:11px;color:#888;text-align:center;padding:3px 0;}
-.cal-day{min-height:42px;border-radius:5px;border:0.5px solid #eee;padding:3px 4px;font-size:11px;background:#fff;}
+.cal-dname{font-size:11px;color:#888;text-align:center;padding:3px 0;font-weight:500;}
+.cal-day{min-height:60px;border-radius:5px;border:0.5px solid #eee;padding:4px;font-size:10px;background:#fff;overflow:hidden;}
 .cal-day.past{opacity:0.4;}
-.cal-day.today-cell{border-color:#0066cc;}
-.cal-pip{font-size:10px;border-radius:3px;padding:1px 4px;margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.cal-day.today-cell{border:2px solid #0066cc;background:#E6F1FB;}
+.cal-day-num{font-size:11px;font-weight:500;margin-bottom:2px;color:#333;}
+.cal-pip{font-size:9px;border-radius:3px;padding:1px 3px;margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:1.2;}
 .pip-b{background:#E6F1FB;color:#0C447C;}
 .pip-s{background:#E1F5EE;color:#085041;}
 .pip-c{background:#FCEBEB;color:#791F1F;}
-.cal-nav{display:flex;align-items:center;gap:8px;}
-.cal-nav span{font-size:14px;font-weight:500;min-width:140px;text-align:center;}
-.legend{display:flex;gap:10px;font-size:11px;align-items:center;flex-wrap:wrap;}
+.cal-nav{display:flex;align-items:center;gap:8px;justify-content:center;margin-bottom:12px;}
+.cal-nav span{font-size:14px;font-weight:500;min-width:180px;text-align:center;}
+.legend{display:flex;gap:10px;font-size:11px;align-items:center;flex-wrap:wrap;margin-bottom:12px;}
 .leg-dot{width:10px;height:10px;border-radius:2px;display:inline-block;margin-right:3px;}
 .summary-box{background:#f9f9f7;border-radius:8px;padding:12px 14px;margin-bottom:10px;}
 .summary-row{display:flex;justify-content:space-between;font-size:13px;margin-bottom:4px;}
 .summary-row:last-child{margin-bottom:0;font-weight:500;border-top:0.5px solid #e0e0e0;padding-top:6px;margin-top:4px;}
+.spinner{display:inline-block;width:12px;height:12px;border:2px solid #ccc;border-top:2px solid #0066cc;border-radius:50%;animation:spin 0.8s linear infinite;}
+@keyframes spin{to{transform:rotate(360deg);}}
 @keyframes slideIn{from{transform:translateX(300px);opacity:0;}to{transform:translateX(0);opacity:1;}}
 </style>
 </head>
 <body>
 <div class="wrap">
   <h1>Guest Parking Pass Tracker</h1>
-  <p class="sub">Internal only &bull; 2 passes &bull; $15/day</p>
+  <p class="sub">Internal only • 2 passes • $15/day • Cloud synced</p>
+  <div id="syncBadge" class="sync-badge online">🟢 Connected</div>
 
   <div id="alertBar" class="alert-bar">
     <div class="alert-title">Double booking detected</div>
@@ -98,20 +106,20 @@ h1{font-size:18px;font-weight:500;margin-bottom:2px;}
 
   <div class="metrics">
     <div class="metric"><div class="ml">Total passes</div><div class="mv">2</div></div>
-    <div class="metric"><div class="ml">Active now</div><div class="mv" id="mBooked">0</div></div>
-    <div class="metric"><div class="ml">Available</div><div class="mv" id="mAvail">2</div></div>
-    <div class="metric"><div class="ml">Total earned</div><div class="mv green" id="mEarned">$0</div></div>
-    <div class="metric"><div class="ml">Upcoming income</div><div class="mv green" id="mUpcoming">$0</div></div>
-    <div class="metric"><div class="ml">Pending charges</div><div class="mv" style="color:#BA7517;" id="mPending">$0</div></div>
+    <div class="metric"><div class="ml">Active now</div><div class="mv" id="mBooked">—</div></div>
+    <div class="metric"><div class="ml">Available</div><div class="mv" id="mAvail">—</div></div>
+    <div class="metric"><div class="ml">Total earned</div><div class="mv green" id="mEarned">—</div></div>
+    <div class="metric"><div class="ml">Upcoming income</div><div class="mv green" id="mUpcoming">—</div></div>
+    <div class="metric"><div class="ml">Pending charges</div><div class="mv" style="color:#BA7517;" id="mPending">—</div></div>
   </div>
 
   <div class="pass-vis" id="passVis"></div>
 
   <div class="nav-row">
     <button class="nav-tab on" onclick="showSec('book',this)">Book / Sell</button>
-    <button class="nav-tab" onclick="showSec('charge',this)">Charge through</button>
     <button class="nav-tab" onclick="showSec('calendar',this)">Calendar</button>
     <button class="nav-tab" onclick="showSec('active',this)">Active</button>
+    <button class="nav-tab" onclick="showSec('charge',this)">Charge tracking</button>
     <button class="nav-tab" onclick="showSec('history',this)">History</button>
   </div>
 
@@ -156,11 +164,38 @@ h1{font-size:18px;font-weight:500;margin-bottom:2px;}
     </div>
   </div>
 
-  <!-- CHARGE THROUGH -->
+  <!-- CALENDAR -->
+  <div id="sec-calendar" class="sec">
+    <div class="card">
+      <div class="card-title" style="margin-bottom:12px;">Booking calendar</div>
+      <div class="cal-nav">
+        <button class="btn sml" onclick="calPrev()">← Previous</button>
+        <span id="calTitle"></span>
+        <button class="btn sml" onclick="calNext()">Next →</button>
+      </div>
+      <div class="legend">
+        <span><span class="leg-dot" style="background:#E6F1FB;"></span>Booking</span>
+        <span><span class="leg-dot" style="background:#E1F5EE;"></span>Pre-sold</span>
+        <span><span class="leg-dot" style="background:#FCEBEB;"></span>Conflict</span>
+      </div>
+      <div class="cal-grid" id="calNames"></div>
+      <div class="cal-grid" id="calGrid"></div>
+    </div>
+  </div>
+
+  <!-- ACTIVE -->
+  <div id="sec-active" class="sec">
+    <div class="card">
+      <div class="card-title" style="margin-bottom:12px;">Active bookings &amp; pre-sales</div>
+      <div id="activeList"></div>
+    </div>
+  </div>
+
+  <!-- CHARGE TRACKING -->
   <div id="sec-charge" class="sec">
     <div class="card">
-      <div class="card-head"><span class="card-title">Charge through</span></div>
-      <p style="font-size:13px;color:#888;margin-bottom:14px;">Record parking charges processed through Hostaway or Airbnb and track payment status.</p>
+      <div class="card-head"><span class="card-title">Charge tracking</span></div>
+      <p style="font-size:13px;color:#888;margin-bottom:14px;">Record parking charges processed through platforms.</p>
       <div class="form-grid">
         <div class="fg"><label>Guest name</label><input type="text" id="cName" placeholder="Full name"></div>
         <div class="fg"><label>Unit</label>
@@ -191,34 +226,6 @@ h1{font-size:18px;font-weight:500;margin-bottom:2px;}
     </div>
   </div>
 
-  <!-- CALENDAR -->
-  <div id="sec-calendar" class="sec">
-    <div class="card">
-      <div class="card-head">
-        <div class="cal-nav">
-          <button class="btn sml" onclick="calPrev()">&#8592;</button>
-          <span id="calTitle"></span>
-          <button class="btn sml" onclick="calNext()">&#8594;</button>
-        </div>
-        <div class="legend">
-          <span><span class="leg-dot" style="background:#E6F1FB;"></span>Booking</span>
-          <span><span class="leg-dot" style="background:#E1F5EE;"></span>Pre-sold</span>
-          <span><span class="leg-dot" style="background:#FCEBEB;"></span>Conflict</span>
-        </div>
-      </div>
-      <div class="cal-grid" id="calNames"></div>
-      <div class="cal-grid" id="calGrid"></div>
-    </div>
-  </div>
-
-  <!-- ACTIVE -->
-  <div id="sec-active" class="sec">
-    <div class="card">
-      <div class="card-title" style="margin-bottom:12px;">Active bookings &amp; pre-sales</div>
-      <div id="activeList"></div>
-    </div>
-  </div>
-
   <!-- HISTORY -->
   <div id="sec-history" class="sec">
     <div class="card">
@@ -239,9 +246,44 @@ h1{font-size:18px;font-weight:500;margin-bottom:2px;}
   </div>
 </div>
 
+<script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js"></script>
+
 <script>
-const RATE=15,PASSES=2,SK='pkData5';
-let formMode='book',calYear,calMonth;
+const RATE=15,PASSES=2;
+let db,formMode='book',calYear,calMonth;
+let isOnline=true;
+
+const firebaseConfig={
+  apiKey:"AIzaSyAcaTiqbuucW0E865PSTmCiuSgjgo8KyRE",
+  authDomain:"parking-tracker-2223d.firebaseapp.com",
+  projectId:"parking-tracker-2223d",
+  storageBucket:"parking-tracker-2223d.firebasestorage.app",
+  messagingSenderId:"317250361483",
+  appId:"1:317250361483:web:cea1e163749adaa8eb5c8e"
+};
+
+try{
+  firebase.initializeApp(firebaseConfig);
+  db=firebase.firestore();
+  db.settings({experimentalForceLongPolling:true});
+} catch(e){
+  console.error("Firebase init error:",e);
+}
+
+window.addEventListener('online',()=>{isOnline=true;updateSyncBadge();});
+window.addEventListener('offline',()=>{isOnline=false;updateSyncBadge();});
+
+function updateSyncBadge(){
+  const badge=document.getElementById('syncBadge');
+  if(isOnline){
+    badge.textContent='🟢 Connected';
+    badge.className='sync-badge online';
+  } else {
+    badge.textContent='🔴 Offline';
+    badge.className='sync-badge offline';
+  }
+}
 
 function todayStr(){
   const d=new Date();
@@ -257,15 +299,14 @@ function calcDays(a,b){
 }
 
 function fmt(n){return '$'+(Math.round(n)).toLocaleString();}
-function load(){try{const s=localStorage.getItem(SK);return s?JSON.parse(s):{bookings:[],sales:[],charges:[]};}catch(e){return{bookings:[],sales:[],charges:[]};}}
-function save(d){localStorage.setItem(SK,JSON.stringify(d));}
 function datesOverlap(s1,e1,s2,e2){return s1<e2&&e1>s2;}
 
-function getConflicts(){
-  const d=load();
+async function getConflicts(){
+  const bookings=await getBookings();
+  const presales=await getPresales();
   const all=[
-    ...d.bookings.map(b=>({id:b.id,name:b.guestName,checkIn:b.checkIn,checkOut:b.checkOut})),
-    ...d.sales.filter(s=>s.type==='presale').map(s=>({id:s.id,name:s.guestName,checkIn:s.startDate,checkOut:s.endDate}))
+    ...bookings.map(b=>({id:b.id,name:b.guestName,checkIn:b.checkIn,checkOut:b.checkOut})),
+    ...presales.map(s=>({id:s.id,name:s.guestName,checkIn:s.startDate,checkOut:s.endDate}))
   ];
   const out=[];
   for(let i=0;i<all.length;i++)for(let j=i+1;j<all.length;j++){
@@ -274,16 +315,57 @@ function getConflicts(){
   return out;
 }
 
-function conflictsForNew(start,end){
-  const d=load();
+async function conflictsForNew(start,end){
+  const bookings=await getBookings();
+  const presales=await getPresales();
   const all=[
-    ...d.bookings.map(b=>({id:b.id,name:b.guestName,checkIn:b.checkIn,checkOut:b.checkOut})),
-    ...d.sales.filter(s=>s.type==='presale').map(s=>({id:s.id,name:s.guestName,checkIn:s.startDate,checkOut:s.endDate}))
+    ...bookings.map(b=>({id:b.id,name:b.guestName,checkIn:b.checkIn,checkOut:b.checkOut})),
+    ...presales.map(s=>({id:s.id,name:s.guestName,checkIn:s.startDate,checkOut:s.endDate}))
   ];
   return all.filter(x=>datesOverlap(start,end,x.checkIn,x.checkOut));
 }
 
-function updateCalc(){
+async function getBookings(){
+  try{
+    const snap=await db.collection('bookings').get();
+    return snap.docs.map(d=>({id:d.id,...d.data()}));
+  } catch(e){
+    console.error("Get bookings error:",e);
+    return [];
+  }
+}
+
+async function getPresales(){
+  try{
+    const snap=await db.collection('presales').get();
+    return snap.docs.map(d=>({id:d.id,...d.data()}));
+  } catch(e){
+    console.error("Get presales error:",e);
+    return [];
+  }
+}
+
+async function getCharges(){
+  try{
+    const snap=await db.collection('charges').get();
+    return snap.docs.map(d=>({id:d.id,...d.data()}));
+  } catch(e){
+    console.error("Get charges error:",e);
+    return [];
+  }
+}
+
+async function getSales(){
+  try{
+    const snap=await db.collection('sales').get();
+    return snap.docs.map(d=>({id:d.id,...d.data()}));
+  } catch(e){
+    console.error("Get sales error:",e);
+    return [];
+  }
+}
+
+async function updateCalc(){
   const s=document.getElementById('fStart').value;
   const e=document.getElementById('fEnd').value;
   const days=calcDays(s,e);
@@ -293,9 +375,9 @@ function updateCalc(){
   const ok=document.getElementById('fOk');
   w.style.display='none';ok.style.display='none';
   if(days>0){
-    const cf=conflictsForNew(s,e);
-    if(cf.length>=PASSES){w.textContent='Both passes already booked in this period. Cannot add.';w.style.display='block';}
-    else if(cf.length===1){w.textContent='Warning: 1 pass already booked in this period. Only 1 pass remaining.';w.style.display='block';}
+    const cf=await conflictsForNew(s,e);
+    if(cf.length>=PASSES){w.textContent='Both passes already booked. Cannot add.';w.style.display='block';}
+    else if(cf.length===1){w.textContent='Warning: 1 pass already booked. Only 1 available.';w.style.display='block';}
     else{ok.style.display='block';}
   }
 }
@@ -328,7 +410,7 @@ function showSec(id,btn){
   if(id==='charge')renderCharges();
 }
 
-function submitForm(){
+async function submitForm(){
   const name=document.getElementById('fName').value.trim();
   const unit=document.getElementById('fUnit').value;
   const start=document.getElementById('fStart').value;
@@ -337,30 +419,38 @@ function submitForm(){
   if(!name||!unit||!start||!end){alert('Please fill all required fields');return;}
   const days=calcDays(start,end);
   if(days<=0){alert('Check-out must be after check-in');return;}
-  const cf=conflictsForNew(start,end);
+  const cf=await conflictsForNew(start,end);
   if(cf.length>=PASSES){alert('Both passes are already booked during this period.');return;}
   const income=days*RATE;
-  const d=load();
-  const id=Date.now();
-  if(formMode==='book'){
-    d.bookings.push({id,guestName:name,unit,checkIn:start,checkOut:end,days,income,platform,addedDate:todayStr()});
-  } else {
-    d.sales.push({id,guestName:name,unit,startDate:start,endDate:end,days,income,platform,date:todayStr(),type:'presale'});
+  const btn=document.getElementById('fBtn');
+  btn.disabled=true;
+  btn.textContent='Saving...';
+  try{
+    if(formMode==='book'){
+      await db.collection('bookings').add({guestName:name,unit,checkIn:start,checkOut:end,days,income,platform:platform||'',addedDate:todayStr()});
+    } else {
+      await db.collection('presales').add({guestName:name,unit,startDate:start,endDate:end,days,income,platform:platform||'',date:todayStr()});
+    }
+    document.getElementById('fName').value='';
+    document.getElementById('fUnit').value='';
+    document.getElementById('fPlatform').value='';
+    document.getElementById('fDays').value='';
+    document.getElementById('fIncome').value='';
+    document.getElementById('fWarn').style.display='none';
+    document.getElementById('fOk').style.display='none';
+    initDates();
+    renderAll();
+    showToast((formMode==='book'?'Booking added':'Pass pre-sold')+' — '+fmt(income));
+  } catch(e){
+    console.error("Submit error:",e);
+    alert('Error saving. Check console.');
+  } finally{
+    btn.disabled=false;
+    btn.textContent=formMode==='book'?'Add booking':'Record sale';
   }
-  save(d);
-  document.getElementById('fName').value='';
-  document.getElementById('fUnit').value='';
-  document.getElementById('fPlatform').value='';
-  document.getElementById('fDays').value='';
-  document.getElementById('fIncome').value='';
-  document.getElementById('fWarn').style.display='none';
-  document.getElementById('fOk').style.display='none';
-  initDates();
-  renderAll();
-  showToast((formMode==='book'?'Booking added':'Pass pre-sold')+' for '+name+' — '+fmt(income));
 }
 
-function addCharge(){
+async function addCharge(){
   const name=document.getElementById('cName').value.trim();
   const unit=document.getElementById('cUnit').value;
   const date=document.getElementById('cDate').value;
@@ -369,54 +459,64 @@ function addCharge(){
   const notes=document.getElementById('cNotes').value.trim();
   if(!name||!unit||!date||!platform||days<=0){alert('Please fill all required fields');return;}
   const amount=days*RATE;
-  const d=load();
-  if(!d.charges)d.charges=[];
-  d.charges.push({id:Date.now(),guestName:name,unit,date,platform,days,amount,notes,status:'pending'});
-  save(d);
-  document.getElementById('cName').value='';
-  document.getElementById('cUnit').value='';
-  document.getElementById('cPlatform').value='';
-  document.getElementById('cDays').value='';
-  document.getElementById('cAmount').value='';
-  document.getElementById('cNotes').value='';
-  renderAll();
-  showToast('Charge recorded: '+fmt(amount)+' via '+platform);
+  try{
+    await db.collection('charges').add({guestName:name,unit,date,platform,days,amount,notes:notes||'',status:'pending'});
+    document.getElementById('cName').value='';
+    document.getElementById('cUnit').value='';
+    document.getElementById('cPlatform').value='';
+    document.getElementById('cDays').value='';
+    document.getElementById('cAmount').value='';
+    document.getElementById('cNotes').value='';
+    renderAll();
+    showToast('Charge recorded: '+fmt(amount));
+  } catch(e){
+    console.error("Add charge error:",e);
+    alert('Error recording charge.');
+  }
 }
 
-function toggleChargeStatus(id){
-  const d=load();
-  const c=d.charges.find(x=>x.id===id);
-  if(!c)return;
-  c.status=c.status==='pending'?'paid':'pending';
-  save(d);
-  renderAll();
+async function toggleChargeStatus(id){
+  try{
+    const doc=await db.collection('charges').doc(id).get();
+    const status=doc.data().status==='pending'?'paid':'pending';
+    await db.collection('charges').doc(id).update({status});
+    renderAll();
+  } catch(e){
+    console.error("Toggle error:",e);
+  }
 }
 
-function deleteCharge(id){
+async function deleteCharge(id){
   if(!confirm('Delete this charge?'))return;
-  const d=load();
-  d.charges=d.charges.filter(x=>x.id!==id);
-  save(d);
-  renderAll();
+  try{
+    await db.collection('charges').doc(id).delete();
+    renderAll();
+  } catch(e){
+    console.error("Delete charge error:",e);
+  }
 }
 
-function removeBooking(id){
-  const d=load();
-  const b=d.bookings.find(x=>x.id===id);
-  if(!b)return;
-  d.bookings=d.bookings.filter(x=>x.id!==id);
-  d.sales.push({id:Date.now(),guestName:b.guestName,unit:b.unit,startDate:b.checkIn,endDate:b.checkOut,days:b.days,income:b.income,platform:b.platform||'',date:todayStr(),type:'checkout'});
-  save(d);
-  renderAll();
-  showToast(b.guestName+' checked out — '+fmt(b.income));
+async function removeBooking(id){
+  try{
+    const doc=await db.collection('bookings').doc(id).get();
+    const data=doc.data();
+    await db.collection('bookings').doc(id).delete();
+    await db.collection('sales').add({...data,id:undefined,type:'checkout',checkedOutDate:todayStr()});
+    renderAll();
+    showToast(data.guestName+' checked out — '+fmt(data.income));
+  } catch(e){
+    console.error("Remove booking error:",e);
+  }
 }
 
-function deleteSale(id){
+async function deleteSale(id){
   if(!confirm('Delete this record?'))return;
-  const d=load();
-  d.sales=d.sales.filter(x=>x.id!==id);
-  save(d);
-  renderAll();
+  try{
+    await db.collection('sales').doc(id).delete();
+    renderAll();
+  } catch(e){
+    console.error("Delete sale error:",e);
+  }
 }
 
 function platBadge(p){
@@ -425,13 +525,16 @@ function platBadge(p){
   return '<span class="badge '+cls+'">'+p+'</span>';
 }
 
-function renderMetrics(){
-  const d=load();
+async function renderMetrics(){
+  const bookings=await getBookings();
+  const presales=await getPresales();
+  const sales=await getSales();
+  const charges=await getCharges();
   const now=new Date();
-  const activeB=d.bookings.filter(b=>new Date(b.checkOut)>now);
-  const earned=d.sales.reduce((s,x)=>s+(x.income||0),0);
+  const activeB=bookings.filter(b=>new Date(b.checkOut)>now);
+  const earned=sales.reduce((s,x)=>s+(x.income||0),0);
   const upcoming=activeB.reduce((s,b)=>s+calcDays(todayStr(),b.checkOut)*RATE,0);
-  const pending=(d.charges||[]).filter(c=>c.status==='pending').reduce((s,c)=>s+(c.amount||0),0);
+  const pending=charges.filter(c=>c.status==='pending').reduce((s,c)=>s+(c.amount||0),0);
   document.getElementById('mBooked').textContent=activeB.length;
   document.getElementById('mAvail').textContent=PASSES-activeB.length;
   document.getElementById('mEarned').textContent=fmt(earned);
@@ -439,16 +542,17 @@ function renderMetrics(){
   document.getElementById('mPending').textContent=fmt(pending);
 }
 
-function renderPassVis(){
-  const d=load();
+async function renderPassVis(){
+  const bookings=await getBookings();
+  const presales=await getPresales();
   const now=new Date();
-  const activeB=d.bookings.filter(b=>new Date(b.checkOut)>now);
-  const activeSales=d.sales.filter(s=>s.type==='presale'&&new Date(s.endDate)>now);
+  const activeB=bookings.filter(b=>new Date(b.checkOut)>now);
+  const activeSales=presales.filter(s=>new Date(s.endDate)>now);
   const all=[
     ...activeB.map(b=>({name:b.guestName,unit:b.unit,end:b.checkOut,type:'booking',id:b.id})),
     ...activeSales.map(s=>({name:s.guestName,unit:s.unit,end:s.endDate,type:'presale',id:s.id}))
   ];
-  const cf=getConflicts();
+  const cf=await getConflicts();
   const cIds=new Set();cf.forEach(c=>{cIds.add(c.a.id);cIds.add(c.b.id);});
   let html='';
   for(let i=0;i<PASSES;i++){
@@ -456,9 +560,9 @@ function renderPassVis(){
     const isCfl=slot&&cIds.has(slot.id);
     if(slot){
       html+='<div class="pass-slot '+(isCfl?'conflict-slot':'used')+'">'
-        +'<div class="ps-label">Pass '+(i+1)+(isCfl?' &mdash; CONFLICT':'')+'</div>'
+        +'<div class="ps-label">Pass '+(i+1)+(isCfl?' — CONFLICT':'')+'</div>'
         +'<div class="ps-val">'+slot.name+'</div>'
-        +'<div class="ps-det">'+slot.unit+' &bull; until '+slot.end+'</div></div>';
+        +'<div class="ps-det">'+slot.unit+' • until '+slot.end+'</div></div>';
     } else {
       html+='<div class="pass-slot"><div class="ps-label">Pass '+(i+1)+'</div><div class="ps-val" style="color:#aaa;">Available</div></div>';
     }
@@ -466,45 +570,45 @@ function renderPassVis(){
   document.getElementById('passVis').innerHTML=html;
 }
 
-function renderConflictAlert(){
-  const cf=getConflicts();
+async function renderConflictAlert(){
+  const cf=await getConflicts();
   const bar=document.getElementById('alertBar');
   if(!cf.length){bar.classList.remove('show');return;}
   bar.classList.add('show');
-  document.getElementById('alertBody').innerHTML=cf.map(c=>'<div class="alert-item">'+c.a.name+' ('+c.a.checkIn+'&ndash;'+c.a.checkOut+') overlaps with '+c.b.name+' ('+c.b.checkIn+'&ndash;'+c.b.checkOut+')</div>').join('');
+  document.getElementById('alertBody').innerHTML=cf.map(c=>'<div class="alert-item">'+c.a.name+' ('+c.a.checkIn+'–'+c.a.checkOut+') overlaps with '+c.b.name+' ('+c.b.checkIn+'–'+c.b.checkOut+')</div>').join('');
 }
 
-function renderActive(){
-  const d=load();
+async function renderActive(){
+  const bookings=await getBookings();
+  const presales=await getPresales();
   const now=new Date();
-  const activeB=d.bookings.filter(b=>new Date(b.checkOut)>now).sort((a,b)=>new Date(a.checkOut)-new Date(b.checkOut));
-  const activeSales=d.sales.filter(s=>s.type==='presale'&&new Date(s.endDate)>now).sort((a,b)=>new Date(a.endDate)-new Date(b.endDate));
+  const activeB=bookings.filter(b=>new Date(b.checkOut)>now).sort((a,b)=>new Date(a.checkOut)-new Date(b.checkOut));
+  const activeSales=presales.filter(s=>new Date(s.endDate)>now).sort((a,b)=>new Date(a.endDate)-new Date(b.endDate));
   const all=[
     ...activeB.map(x=>({...x,_type:'booking',_start:x.checkIn,_end:x.checkOut})),
     ...activeSales.map(x=>({...x,_type:'presale',_start:x.startDate,_end:x.endDate}))
   ];
   const el=document.getElementById('activeList');
   if(!all.length){el.innerHTML='<div class="empty">No active bookings or pre-sales</div>';return;}
-  const cf=getConflicts();
+  const cf=await getConflicts();
   const cIds=new Set();cf.forEach(c=>{cIds.add(c.a.id);cIds.add(c.b.id);});
   el.innerHTML=all.map(function(b){
     const dLeft=Math.max(0,Math.ceil((new Date(b._end)-new Date())/86400000));
     const isCfl=cIds.has(b.id);
     const typeBadge=b._type==='booking'?'<span class="badge b-blue">Booking</span>':'<span class="badge b-green">Pre-sold</span>';
-    const btn=b._type==='booking'?'<button class="btn sml red" onclick="removeBooking('+b.id+')">Checkout</button>':'';
+    const btn=b._type==='booking'?'<button class="btn sml red" onclick="removeBooking(\''+b.id+'\')">Checkout</button>':'';
     return '<div class="brow'+(isCfl?' cfl':'')+'"><div>'
       +'<div class="bname">'+b.guestName+'</div>'
-      +'<div class="bdet">'+b.unit+' &bull; '+b._start+' to '+b._end+'</div></div>'
+      +'<div class="bdet">'+b.unit+' • '+b._start+' to '+b._end+'</div></div>'
       +'<div class="bacts">'+(isCfl?'<span class="badge b-red">CONFLICT</span>':'')+typeBadge
-      +platBadge(b.platform)
+      +platBadge(b.platform||'')
       +'<span class="badge b-amber">'+dLeft+'d left</span>'
       +'<span class="badge b-green">'+fmt(b.income||0)+'</span>'+btn+'</div></div>';
   }).join('');
 }
 
-function renderCharges(){
-  const d=load();
-  const charges=d.charges||[];
+async function renderCharges(){
+  const charges=await getCharges();
   const el=document.getElementById('chargeList');
   if(!charges.length){el.innerHTML='<div class="empty">No charges recorded yet</div>';return;}
   const pending=charges.filter(c=>c.status==='pending').reduce((s,c)=>s+c.amount,0);
@@ -516,37 +620,38 @@ function renderCharges(){
   html+=[...charges].reverse().map(function(c){
     return '<div class="brow"><div>'
       +'<div class="bname">'+c.guestName+'</div>'
-      +'<div class="bdet">'+c.unit+' &bull; '+c.date+' &bull; '+c.days+' day'+(c.days!==1?'s':'')+(c.notes?' &bull; '+c.notes:'')+'</div></div>'
+      +'<div class="bdet">'+c.unit+' • '+c.date+' • '+c.days+' day'+(c.days!==1?'s':'')+(c.notes?' • '+c.notes:'')+'</div></div>'
       +'<div class="bacts">'+platBadge(c.platform)
       +'<span class="badge b-green">'+fmt(c.amount)+'</span>'
-      +'<button class="btn sml" onclick="toggleChargeStatus('+c.id+')" style="color:'+(c.status==='paid'?'#0F6E56':'#BA7517')+';">'+(c.status==='paid'?'Paid':'Pending')+'</button>'
-      +'<button class="btn sml red" onclick="deleteCharge('+c.id+')">Del</button></div></div>';
+      +'<button class="btn sml" onclick="toggleChargeStatus(\''+c.id+'\')" style="color:'+(c.status==='paid'?'#0F6E56':'#BA7517')+';">'+(c.status==='paid'?'Paid':'Pending')+'</button>'
+      +'<button class="btn sml red" onclick="deleteCharge(\''+c.id+'\')">Del</button></div></div>';
   }).join('');
   el.innerHTML=html;
 }
 
-function renderHistory(){
-  const d=load();
+async function renderHistory(){
+  const sales=await getSales();
   const tbody=document.getElementById('histBody');
-  if(!d.sales.length){tbody.innerHTML='<tr><td colspan="8" class="empty">No history yet</td></tr>';return;}
-  tbody.innerHTML=[...d.sales].reverse().map(function(s){
+  if(!sales.length){tbody.innerHTML='<tr><td colspan="8" class="empty">No history yet</td></tr>';return;}
+  tbody.innerHTML=[...sales].reverse().map(function(s){
     return '<tr><td>'+s.guestName+'</td><td>'+s.unit+'</td>'
-      +'<td style="font-size:11px;">'+(s.startDate||'&mdash;')+' &rarr; '+(s.endDate||'&mdash;')+'</td>'
-      +'<td>'+(s.days||'&mdash;')+'</td>'
-      +'<td style="color:#0F6E56;font-weight:500;">'+(s.income?fmt(s.income):'&mdash;')+'</td>'
-      +'<td>'+platBadge(s.platform)+'</td>'
+      +'<td style="font-size:11px;">'+(s.startDate||s.checkIn||'—')+' → '+(s.endDate||s.checkOut||'—')+'</td>'
+      +'<td>'+(s.days||'—')+'</td>'
+      +'<td style="color:#0F6E56;font-weight:500;">'+(s.income?fmt(s.income):'—')+'</td>'
+      +'<td>'+platBadge(s.platform||'')+'</td>'
       +'<td><span class="badge '+(s.type==='presale'?'b-green':s.type==='checkout'?'b-blue':'b-amber')+'">'+(s.type==='presale'?'Pre-sold':s.type==='checkout'?'Checkout':'Sale')+'</span></td>'
-      +'<td><button class="btn sml red" onclick="deleteSale('+s.id+')">Del</button></td></tr>';
+      +'<td><button class="btn sml red" onclick="deleteSale(\''+s.id+'\')">Del</button></td></tr>';
   }).join('');
 }
 
-function renderCal(){
-  const d=load();
+async function renderCal(){
+  const bookings=await getBookings();
+  const presales=await getPresales();
   const allRanges=[
-    ...d.bookings.map(b=>({start:b.checkIn,end:b.checkOut,name:b.guestName,type:'booking',id:b.id})),
-    ...d.sales.filter(s=>s.type==='presale').map(s=>({start:s.startDate,end:s.endDate,name:s.guestName,type:'presale',id:s.id}))
+    ...bookings.map(b=>({start:b.checkIn,end:b.checkOut,name:b.guestName,type:'booking',id:b.id})),
+    ...presales.map(s=>({start:s.startDate,end:s.endDate,name:s.guestName,type:'presale',id:s.id}))
   ];
-  const cf=getConflicts();
+  const cf=await getConflicts();
   const cDates=new Set();
   cf.forEach(function(c){
     let cur=new Date(c.a.checkIn>c.b.checkIn?c.a.checkIn:c.b.checkIn);
@@ -556,7 +661,7 @@ function renderCal(){
       cur=new Date(cur.getTime()+86400000);
     }
   });
-  document.getElementById('calNames').innerHTML=['Su','Mo','Tu','We','Th','Fr','Sa'].map(n=>'<div class="cal-dname">'+n+'</div>').join('');
+  document.getElementById('calNames').innerHTML=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'].map(n=>'<div class="cal-dname">'+n+'</div>').join('');
   const firstDay=new Date(calYear,calMonth,1);
   const lastDay=new Date(calYear,calMonth+1,0);
   document.getElementById('calTitle').textContent=firstDay.toLocaleString('default',{month:'long',year:'numeric'});
@@ -570,7 +675,7 @@ function renderCal(){
     const dayRanges=allRanges.filter(r=>ds>=r.start&&ds<r.end);
     const isCfl=cDates.has(ds);
     const pips=dayRanges.map(r=>'<div class="cal-pip '+(isCfl?'pip-c':r.type==='booking'?'pip-b':'pip-s')+'">'+r.name.split(' ')[0]+'</div>').join('');
-    html+='<div class="cal-day'+(isToday?' today-cell':'')+(isPast?' past':'')+'"><div style="font-weight:500;margin-bottom:2px;">'+day+'</div>'+pips+'</div>';
+    html+='<div class="cal-day'+(isToday?' today-cell':'')+(isPast?' past':'')+'"><div class="cal-day-num">'+day+'</div>'+pips+'</div>';
   }
   document.getElementById('calGrid').innerHTML=html;
 }
@@ -588,14 +693,14 @@ function initDates(){
   updateCalc();
 }
 
-function renderAll(){
-  renderMetrics();
-  renderPassVis();
-  renderConflictAlert();
-  if(document.getElementById('sec-active').classList.contains('on'))renderActive();
-  if(document.getElementById('sec-history').classList.contains('on'))renderHistory();
-  if(document.getElementById('sec-calendar').classList.contains('on'))renderCal();
-  if(document.getElementById('sec-charge').classList.contains('on'))renderCharges();
+async function renderAll(){
+  await renderMetrics();
+  await renderPassVis();
+  await renderConflictAlert();
+  if(document.getElementById('sec-active').classList.contains('on'))await renderActive();
+  if(document.getElementById('sec-history').classList.contains('on'))await renderHistory();
+  if(document.getElementById('sec-calendar').classList.contains('on'))await renderCal();
+  if(document.getElementById('sec-charge').classList.contains('on'))await renderCharges();
 }
 
 function showToast(msg){
@@ -606,8 +711,22 @@ function showToast(msg){
   setTimeout(function(){t.remove();},3500);
 }
 
-function resetAll(){
-  if(confirm('Clear all data? Cannot be undone.')){localStorage.removeItem(SK);renderAll();showToast('Data cleared');}}
+async function resetAll(){
+  if(!confirm('Clear all data? Cannot be undone.'))return;
+  try{
+    const batch=db.batch();
+    (await db.collection('bookings').get()).docs.forEach(d=>batch.delete(d.ref));
+    (await db.collection('presales').get()).docs.forEach(d=>batch.delete(d.ref));
+    (await db.collection('sales').get()).docs.forEach(d=>batch.delete(d.ref));
+    (await db.collection('charges').get()).docs.forEach(d=>batch.delete(d.ref));
+    await batch.commit();
+    renderAll();
+    showToast('All data cleared');
+  } catch(e){
+    console.error("Reset error:",e);
+    alert('Error clearing data.');
+  }
+}
 
 document.getElementById('fStart').addEventListener('change',updateCalc);
 document.getElementById('fEnd').addEventListener('change',updateCalc);
@@ -617,9 +736,17 @@ const now=new Date();
 calYear=now.getFullYear();
 calMonth=now.getMonth();
 initDates();
-renderAll();
+
+if(db){
+  db.collection('bookings').onSnapshot(()=>renderAll());
+  db.collection('presales').onSnapshot(()=>renderAll());
+  db.collection('sales').onSnapshot(()=>renderAll());
+  db.collection('charges').onSnapshot(()=>renderAll());
+} else {
+  console.error("Firestore not initialized. Check Firebase config.");
+}
+
+updateSyncBadge();
 </script>
 </body>
 </html>
-HTMLEOF
-echo "done"
